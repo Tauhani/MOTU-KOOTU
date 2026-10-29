@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MOTU KOOTU - Caisse</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f2faf8;
+  color: #173b38;
+}
+header {
+  background: #00a99d;
+  color: white;
+  text-align: center;
+  padding: 24px;
+}
+h1 { margin: 0; }
+main { padding: 15px; }
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 15px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.categories {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.categories button {
+  background: #ffdf77;
+}
+.produit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 12px;
+}
+.produit button {
+  background: #00a99d;
+  color: white;
+}
+.panier {
+  background: white;
+  border-radius: 15px;
+  padding: 15px;
+  margin-top: 20px;
+}
+.total {
+  font-size: 23px;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🌺 MOTU KOOTU 🍽️</h1>
+<p>Caisse du snack - Démonstration</p>
+</header>
+
+<main>
+<h2>Catégories</h2>
+<div class="categories" id="categories"></div>
+
+<h2>Produits</h2>
+<div id="produits"></div>
+
+<div class="panier">
+<h2>🛒 Commande</h2>
+<div id="panier"></div>
+<p class="total" id="total">Total : 0 F CFP</p>
+<button onclick="vider()" style="background:#ff8070">
+Nouvelle commande
+</button>
+</div>
+</main>
+
+<script>
+const menu = {
+  "Plat froid": [
+    ["Poisson cru coco + riz",1800],
+    ["Sashimi + riz",1800],
+    ["Carpaccio curry coco",1900]
+  ],
+  "Chinois": [
+    ["Chao Men simple",1500],
+    ["Chao Men spécial",1600],
+    ["Poulet citron + riz",1600]
+  ],
+  "Snack": [
+    ["Burger classique",550],
+    ["Cheeseburger",600],
+    ["Croque-monsieur",450]
+  ],
+  "Dessert": [
+    ["Tarte coco",400],
+    ["Glace",500],
+    ["Dessert du jour",400]
+  ],
+  "Boisson": [
+    ["Vaimato",300],
+    ["Jus de fruits",700],
+    ["Café",300]
+  ],
+  "Autres": []
+};
+
+let commande = [];
+
+const categories = document.getElementById("categories");
+const produits = document.getElementById("produits");
+
+Object.keys(menu).forEach(cat => {
+  const bouton = document.createElement("button");
+  bouton.textContent = cat;
+  bouton.onclick = () => afficher(cat);
+  categories.appendChild(bouton);
+});
+
+function afficher(cat) {
+  produits.innerHTML = "";
+  menu[cat].forEach(([nom, prix]) => {
+    const ligne = document.createElement("div");
+    ligne.className = "produit";
+
+    const texte = document.createElement("span");
+    texte.textContent = nom + " - " + prix + " F";
+
+    const bouton = document.createElement("button");
+    bouton.textContent = "+";
+    bouton.onclick = () => ajouter(nom, prix);
+
+    ligne.append(texte, bouton);
+    produits.appendChild(ligne);
+  });
+}
+
+function ajouter(nom, prix) {
+  const article = commande.find(x => x.nom === nom);
+  if (article) article.quantite++;
+  else commande.push({nom, prix, quantite:1});
+  actualiser();
+}
+
+function actualiser() {
+  const panier = document.getElementById("panier");
+  panier.innerHTML = "";
+  let total = 0;
+
+  commande.forEach((article, index) => {
+    total += article.prix * article.quantite;
+
+    const ligne = document.createElement("div");
+    ligne.className = "produit";
+
+    const texte = document.createElement("span");
+    texte.textContent =
+      article.quantite + " × " + article.nom;
+
+    const moins = document.createElement("button");
+    moins.textContent = "−";
+    moins.onclick = () => {
+      article.quantite--;
+      if (article.quantite === 0) commande.splice(index,1);
+      actualiser();
+    };
+
+    ligne.append(texte, moins);
+    panier.appendChild(ligne);
+  });
+
+  document.getElementById("total").textContent =
+    "Total : " + total.toLocaleString("fr-FR") + " F CFP";
+}
+
+function vider() {
+  if (confirm("Effacer cette commande ?")) {
+    commande = [];
+    actualiser();
+  }
+}
+
+afficher("Plat froid");
+</script>
+</body>
+</html>
